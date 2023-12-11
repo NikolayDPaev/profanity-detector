@@ -25,15 +25,9 @@ class Edit_suggester:
         self.dictionary = dictionary
         self.postings = defaultdict(lambda: [])
         self.n = n
-        already_processed = set()
-        for doc in dictionary:
-            for token in doc:
-                if token in already_processed:
-                    continue
-
-                already_processed.add(token)
-                for ngram in self.get_ngrams(token):
-                    self.postings[ngram].append(token)
+        for token in self.dictionary:
+            for ngram in self.get_ngrams(token):
+                self.postings[ngram].append(token)
 
     def get_ngrams(self, token):
         ngrams = []
@@ -43,14 +37,19 @@ class Edit_suggester:
             i += 1
         return ngrams
 
-    def ngram_spellcheck(self, word, jaccard_threshold=0.7):
+    def ngram_spellcheck(self, word, jaccard_threshold=0.7) -> str | None:
         """Return the word from the postings structure, which is closest to the input word."""
         union_of_postings = sum([self.postings[ngram] for ngram in self.get_ngrams(word)], [])
 
         suggestions = []
         for suggested_word, occurences in Counter(union_of_postings).most_common():
-            jaccard_coeff = occurences / (len(suggested_word) - self.n + len(word) - self.n)
+            denominator = len(suggested_word) - self.n + len(word) - self.n
+            jaccard_coeff = occurences / denominator if denominator != 0 else 0
+
             if jaccard_coeff > jaccard_threshold:
                 suggestions.append(suggested_word)
 
-        return np.argmin([levenshteinDistance(x, word) for x in suggestions])
+        if len(suggestions) == 0:
+            return None
+
+        return suggestions[np.argmin([levenshteinDistance(x, word) for x in suggestions])]
