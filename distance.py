@@ -54,8 +54,10 @@ class Edit_suggester:
 
         return suggestions[np.argmin([levenshteinDistance(x, word) for x in suggestions])]
 
-    def ngram_all_closest_words(self, word, jaccard_threshold=0.7, tolerance=0) -> list[str]:
-        """Return n closest words to the word."""
+    def ngram_all_closest_words(self, word, jaccard_threshold=0.3, edit_tolerance=0) -> list[str]:
+        """Returns all closest words to the word.
+        If the word is in the vocabulary it will return it.
+        If not it will return all words that are on the same edit distance to it"""
         union_of_postings = sum([self.postings[ngram] for ngram in self.get_ngrams(word)], [])
 
         suggestions = []
@@ -66,10 +68,13 @@ class Edit_suggester:
             if jaccard_coeff > jaccard_threshold:
                 suggestions.append(suggested_word)
 
+        if len(suggestions) == 0:
+            return []
+
         suggestions_distance = list(map(lambda x: (x, levenshteinDistance(x, word)), suggestions))
         minimum_distance = min(map(lambda x: x[1], suggestions_distance))
 
         return [suggestion_distance[0]
                     for suggestion_distance in suggestions_distance
-                        if suggestion_distance[1] <= minimum_distance + tolerance
+                        if suggestion_distance[1] <= minimum_distance + edit_tolerance
         ]
