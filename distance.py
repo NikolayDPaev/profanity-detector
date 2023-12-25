@@ -44,7 +44,7 @@ class Edit_suggester:
         suggestions = []
         for suggested_word, occurences in Counter(union_of_postings).most_common():
             denominator = len(suggested_word) - self.n + len(word) - self.n
-            jaccard_coeff = occurences / denominator if denominator != 0 else 0
+            jaccard_coeff = occurences / denominator if denominator != 0 else 1
 
             if jaccard_coeff > jaccard_threshold:
                 suggestions.append(suggested_word)
@@ -63,7 +63,7 @@ class Edit_suggester:
         suggestions = []
         for suggested_word, occurences in Counter(union_of_postings).most_common():
             denominator = len(suggested_word) - self.n + len(word) - self.n
-            jaccard_coeff = occurences / denominator if denominator != 0 else 0
+            jaccard_coeff = occurences / denominator if denominator != 0 else 1
 
             if jaccard_coeff > jaccard_threshold:
                 suggestions.append(suggested_word)
