@@ -1,4 +1,5 @@
 import json
+
 from nltk.tokenize import regexp_tokenize
 
 mapping = []
@@ -33,6 +34,12 @@ def cyrillize(token: str) -> str:
 
 pattern = r'[^\s,\.,\!,\?]+'
 
-def preprocess(comment: str) -> list[str]:
-    """Cyrillizes and tokenizes the given string"""
-    return [cyrillize(token.lower()) for token in regexp_tokenize(comment, pattern)]
+def preprocess(comment: str, aggressive: bool = False) -> list[str]:
+    """Cyrillizes and tokenizes the given string.
+       If aggressive is set to True performs aggressive normalization -
+       filters all non alphabetic and non whitespace characters
+    """
+    comment = cyrillize(comment.lower())
+    if aggressive:
+        comment = "".join([c for c in comment if c.isalpha() or c.isspace()])
+    return regexp_tokenize(comment, pattern)
