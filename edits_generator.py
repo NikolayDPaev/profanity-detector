@@ -33,3 +33,38 @@ def generate_k_random_candidates(w, k, alphabet) -> list[str]:
 	for e in generate_edits(w, alphabet):
 		candidates += generate_edits(e, alphabet)
 	return random.choices(candidates, k=k)
+
+def generate_edit_efficient(w, alphabet):
+	operation = random.randint(1, 4)
+	if len(w) < 2:
+		operation = random.randint(1, 3)
+
+	if operation == 1: # delete
+		i = random.randint(0, len(w)-1)
+		return w[:i] + w[i + 1:]
+
+	elif operation == 2: # insert
+		l = alphabet[random.randint(0, len(alphabet)-1)]
+		i = random.randint(0, len(w))
+		if i == len(w):
+			return w + l
+		return w[:i] + l + w[i:]
+
+	elif operation == 3: # replace
+		l = alphabet[random.randint(0, len(alphabet)-1)]
+		i = random.randint(0, len(w)-1)
+		return w[:i] + l + w[i+1:]
+
+	# flip
+	i = random.randint(0, len(w) - 2)
+	return w[:i] + w[i+1] + w[i] + w[i+2:]
+
+def generate_k_random_candidates_efficient(w, k, alphabet) -> list[str]:
+	candidates = []
+	for _ in range(k):
+		first = generate_edit_efficient(w, alphabet)
+		if len(first) > 2:
+			candidates.append(generate_edit_efficient(first, alphabet))
+		else:
+			candidates.append(first)
+	return candidates
