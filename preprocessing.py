@@ -19,18 +19,19 @@ def match(pattern: str, token: str) -> tuple[bool, str]:
     return (n >= m, token[m:])
 
 def cyrillize(token: str) -> str:
-    translated = ""
+    translated = []
     while len(token) > 0:
         success = False
         for (p, m) in mapping:
-            success, new_token = match(p, token)
+            success, new_token = match(p, token.lower())
             if success:
                 token = new_token
                 translated += m
                 break
         if not success:
-            return token
-    return translated
+            translated += token[0]
+            token = token[1:]
+    return "".join(translated)
 
 pattern = r'[^\s,\.,\!,\?]+'
 
