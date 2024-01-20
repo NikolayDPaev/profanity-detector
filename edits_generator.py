@@ -35,9 +35,9 @@ def generate_k_random_candidates(w, k, alphabet) -> list[str]:
 	return random.choices(candidates, k=k)
 
 def generate_edit_efficient(w, alphabet):
-	operation = random.randint(1, 4)
+	operation = random.randint(1, 5)
 	if len(w) < 2:
-		operation = random.randint(1, 3)
+		operation = random.randint(1, 4)
 
 	if operation == 1: # delete
 		i = random.randint(0, len(w)-1)
@@ -55,7 +55,12 @@ def generate_edit_efficient(w, alphabet):
 		i = random.randint(0, len(w)-1)
 		return w[:i] + l + w[i+1:]
 
-	# flip
+	elif operation == 4: # multiply
+		i = random.randint(0, len(w)-1)
+		m = random.randint(1, len(w))
+		return w[:i] + m*w[i] + w[i+1:]
+
+	# operation 5 - flip
 	i = random.randint(0, len(w) - 2)
 	return w[:i] + w[i+1] + w[i] + w[i+2:]
 
