@@ -18,12 +18,14 @@ def match(pattern: str, token: str) -> tuple[bool, str]:
             return (False, token)
     return (n >= m, token[m:])
 
-def cyrillize(token: str) -> str:
+def cyrillize(token: str, lower: bool = True) -> str:
     translated = []
+    if lower:
+        token = token.lower()
     while len(token) > 0:
         success = False
         for (p, m) in mapping:
-            success, new_token = match(p, token.lower())
+            success, new_token = match(p, token)
             if success:
                 token = new_token
                 translated += m
