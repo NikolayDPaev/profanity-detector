@@ -38,7 +38,7 @@ def get_sub_word_tokenization_embedding(dim=100):
     svd.fit(X)
     X_reduced = svd.transform(X)
 
-    return lambda comment: np.stack([X_reduced[token2ind[token]] for token in tokenizer.encode(comment).tokens])
+    return lambda comment: np.stack([X_reduced[token2ind[token]] for token in tokenizer.encode(comment.lower()).tokens])
 
 
 def get_noise_dampening_embedding(dim, device):
@@ -110,7 +110,7 @@ def get_noise_dampening_embedding(dim, device):
     def comment_embedding(comment):
         tokens = [
             svd.transform(embedding(word).cpu().flatten(end_dim=1)).flatten()
-            for word in regexp_tokenize(comment, pattern)
+            for word in regexp_tokenize(comment.lower(), pattern)
         ]
         if len(tokens) != 0:
             return np.vstack(tokens)
