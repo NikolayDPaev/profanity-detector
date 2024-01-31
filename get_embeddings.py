@@ -7,8 +7,11 @@ from preprocessing import cyrillize, pattern
 from sklearn.decomposition import TruncatedSVD
 from nltk.tokenize import regexp_tokenize
 
+def get_sub_word_tokenization_embedding(dim=100, spell_corection=False):
+    ss = SymSpell(max_dictionary_edit_distance=2)
+    if spell_corection:
+        ss.load_comple_model_from_json('data/symspell_model_unsupervised.json')
 
-def get_sub_word_tokenization_embedding(dim=100):
     tokenizer = Tokenizer.from_file("data/tokenizer_comments.json")
     token2ind = tokenizer.get_vocab()
     ind2token = lambda x: tokenizer.id_to_token(x)
@@ -20,7 +23,7 @@ def get_sub_word_tokenization_embedding(dim=100):
 
     n_words = tokenizer.get_vocab_size()
     X=np.zeros((n_words,n_words))
-    for s in ["[UNK]", "[PAD]", "[STR]", "[END]"]:
+    for s in ["[unk]", "[pad]", "[str]", "[end]"]:
         X[token2ind[s], token2ind[s]] = 1
     for comment in tokenized_unsupervised_comments:
         for wi in range(len(comment)):
@@ -38,8 +41,14 @@ def get_sub_word_tokenization_embedding(dim=100):
     svd.fit(X)
     X_reduced = svd.transform(X)
 
-    return lambda comment: np.stack([X_reduced[token2ind[token]] for token in tokenizer.encode(comment.lower()).tokens])
+    def embedding(comment):
+        if spell_corection:
+            try:
+                comment = ss.lookup_compound(comment.lower(), 2)[0].term
+            except: pass
+        return np.stack([X_reduced[token2ind[token]] for token in tokenizer.encode(comment).tokens])
 
+    return embedding
 
 def get_noise_dampening_embedding(dim, device):
     class EncoderRNN(nn.Module):
@@ -92,7 +101,7 @@ def get_noise_dampening_embedding(dim, device):
     encoder.eval()
 
     def embedding(word):
-        if word == '[PAD]':
+        if word == '[pad]':
             return torch.zeros(1, 1, 128)
         with torch.no_grad():
             input_tensor = tensorFromWord(word)
@@ -117,3 +126,27 @@ def get_noise_dampening_embedding(dim, device):
         return []
 
     return comment_embedding
+
+
+def get_char_to_ind_for_char_embedding():
+    with open('data/unsupervised_comments.json', 'r', encoding="utf-8") as f:
+        unsupervised_comments = json.load(f)
+    SOW_token = ''
+    EOW_token = ''
+    UNK_token = '�'
+    alphabet = list(set(c for comment in unsupervised_comments for c in cyrillize(comment))) + [SOW_token, EOW_token, UNK_token]
+    return { key:value for value, key in enumerate(alphabet)}
+
+from symspell import SymSpell
+from preprocessing import preprocess
+
+def get_corrected_word2ind(max_edit_distance=2):
+    with open('data/unsupervised_comments.json', 'r', encoding="utf-8") as f:
+        unsupervised_comments = json.load(f)
+
+    ss = SymSpell(max_dictionary_edit_distance=max_edit_distance)
+    for comment in unsupervised_comments:
+        for token in preprocess(comment):
+            ss.create_dictionary_entry_MT(token)
+
+    ss.save_complete_model_as_json('data/symspell_model_unsupervised.json')
