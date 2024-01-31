@@ -5,7 +5,7 @@
   "added_tokens": [
     {
       "id": 0,
-      "content": "[UNK]",
+      "content": "[unk]",
       "single_word": false,
       "lstrip": false,
       "rstrip": false,
@@ -14,7 +14,7 @@
     },
     {
       "id": 1,
-      "content": "[PAD]",
+      "content": "[pad]",
       "single_word": false,
       "lstrip": false,
       "rstrip": false,
@@ -23,7 +23,7 @@
     },
     {
       "id": 2,
-      "content": "[STR]",
+      "content": "[str]",
       "single_word": false,
       "lstrip": false,
       "rstrip": false,
@@ -32,7 +32,7 @@
     },
     {
       "id": 3,
-      "content": "[END]",
+      "content": "[end]",
       "single_word": false,
       "lstrip": false,
       "rstrip": false,
@@ -59,7 +59,7 @@
     "single": [
       {
         "SpecialToken": {
-          "id": "[STR]",
+          "id": "[str]",
           "type_id": 0
         }
       },
@@ -71,7 +71,7 @@
       },
       {
         "SpecialToken": {
-          "id": "[END]",
+          "id": "[end]",
           "type_id": 0
         }
       }
@@ -91,22 +91,22 @@
       }
     ],
     "special_tokens": {
-      "[END]": {
-        "id": "[END]",
+      "[end]": {
+        "id": "[end]",
         "ids": [
           3
         ],
         "tokens": [
-          "[END]"
+          "[end]"
         ]
       },
-      "[STR]": {
-        "id": "[STR]",
+      "[str]": {
+        "id": "[str]",
         "ids": [
           2
         ],
         "tokens": [
-          "[STR]"
+          "[str]"
         ]
       }
     }
@@ -114,14 +114,14 @@
   "decoder": null,
   "model": {
     "type": "WordPiece",
-    "unk_token": "[UNK]",
+    "unk_token": "[unk]",
     "continuing_subword_prefix": "",
     "max_input_chars_per_word": 100,
     "vocab": {
-      "[UNK]": 0,
-      "[PAD]": 1,
-      "[STR]": 2,
-      "[END]": 3,
+      "[unk]": 0,
+      "[pad]": 1,
+      "[str]": 2,
+      "[end]": 3,
       "\u0004": 4,
       "!": 5,
       "\"": 6,
