@@ -3,9 +3,11 @@ import torch.nn as nn
 import numpy as np
 import json
 from tokenizers import Tokenizer
-from preprocessing import cyrillize, pattern
+from symspell import SymSpell
+from preprocessing import cyrillize, pattern, preprocess
 from sklearn.decomposition import TruncatedSVD
 from nltk.tokenize import regexp_tokenize
+from gensim.models import FastText
 
 def get_sub_word_tokenization_embedding(dim=100, spell_corection=False):
     ss = SymSpell(max_dictionary_edit_distance=2)
@@ -42,7 +44,7 @@ def get_sub_word_tokenization_embedding(dim=100, spell_corection=False):
     X_reduced = svd.transform(X)
 
     def embedding(comment):
-        if spell_corection:
+        if spell_corection and comment != '[pad]':
             try:
                 comment = ss.lookup_compound(comment.lower(), 2)[0].term
             except: pass
@@ -127,7 +129,6 @@ def get_noise_dampening_embedding(dim, device):
 
     return comment_embedding
 
-
 def get_char_to_ind_for_char_embedding():
     with open('data/unsupervised_comments.json', 'r', encoding="utf-8") as f:
         unsupervised_comments = json.load(f)
@@ -136,9 +137,6 @@ def get_char_to_ind_for_char_embedding():
     UNK_token = '�'
     alphabet = list(set(c for comment in unsupervised_comments for c in cyrillize(comment))) + [SOW_token, EOW_token, UNK_token]
     return { key:value for value, key in enumerate(alphabet)}
-
-from symspell import SymSpell
-from preprocessing import preprocess
 
 def get_corrected_word2ind(max_edit_distance=2):
     with open('data/unsupervised_comments.json', 'r', encoding="utf-8") as f:
@@ -150,3 +148,21 @@ def get_corrected_word2ind(max_edit_distance=2):
             ss.create_dictionary_entry_MT(token)
 
     ss.save_complete_model_as_json('data/symspell_model_unsupervised.json')
+
+def get_fast_text_embedding():
+    model = FastText.load('data/fast_text_model.pth')
+    ftext = model.wv
+    def embedding(word):
+        if word == '[pad]':
+            return np.zeros((100))
+        return ftext[word]
+
+    def comment_embedding(comment):
+        tokens = [
+            embedding(word)
+            for word in regexp_tokenize(comment.lower(), pattern)
+        ]
+        if len(tokens) != 0:
+            return np.vstack(tokens)
+        return []
+    return comment_embedding
