@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 
 symspell.py
+symspell_model_unsupervised.json
+data/fast_text_model.pth*
 
 # C extensions
 *.so
